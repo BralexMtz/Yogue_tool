@@ -26,12 +26,14 @@ from algoritmos import views
 # Used to use static() to add url mapping to serve static files during development (only)
 from django.conf import settings
 from django.urls import path, include
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('algoritmos.urls', namespace='algoritmos')),
 ] 
 # solo para fines de depuracion:
-#urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
