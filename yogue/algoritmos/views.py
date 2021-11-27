@@ -3,7 +3,9 @@ from django.shortcuts import render
 from .forms import DocumentForm
 from .models import Document
 from .scripts import file
+from .scripts import apriori_mod
 import os
+from random import sample
 
 # Create your views here.
 def index(request):
@@ -61,11 +63,18 @@ def upload(request):
             })
 
 def apriori(request):
-    try:
-        print(request.session['file_name'])
-    except:
+    if 'file_name' in request.session.keys():
+        return render(request,"apriori.html",{
+            'file_name':os.path.basename(request.session['file_name']),
+            'data': sample(file.get_data(request.session['file_name']), 100),
+            'frecuency_table': apriori_mod.frecuencia(request.session['file_name']),
+            'image_frecuency_url': apriori_mod.bar_frecuency(request.session['file_name'])
+        })
+
+
+    else:
         print("file not uploaded")
-    return render(request,"apriori.html")
+        return render(request,"apriori.html")
 
 def distancias(request):
     try:
