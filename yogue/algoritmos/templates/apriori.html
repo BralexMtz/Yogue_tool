@@ -8,34 +8,7 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Reglas de asociación</li>
                         </ol>
-                        <!-- formulario -->
-                        <h1 class="display-6">Subir datos para analizar</h1>
-                        <form method="post" enctype="multipart/form-data">{% csrf_token %}
-                            <div class="row">
-                                {% if fileStatus and fileStatus == "success"  %}
-                                    <div class="alert alert-success" role="alert">
-                                        Subido existosamente
-                                    </div>
-                                {% else %}
-                                    <div class="col mb-3">
-                                        {% if form %}
-                                            {{ form.as_p }}
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-2 mb-3">
-                                        <button type="submit" class="form-control btn btn-primary">Submit</button>
-                                    </div>    
-                                {% endif %}                                
-                            </div>
-                            {% if fileStatus and fileStatus == "fail" %}
-                            <div class="row">
-                                <div class="alert alert-danger" role="alert">
-                                    Ocurrió un error, por favor trata de subirlo nuevamente
-                                 </div>     
-                            </div>
-                            {% endif %}
-                            
-                        </form>
+                        
                         <div class="row">
                             <div class="col-xl-3 col-md-6">
                                 <div class="card bg-primary text-white mb-4">

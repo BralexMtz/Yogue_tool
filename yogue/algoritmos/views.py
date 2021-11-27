@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from .forms import DocumentForm
 from .models import Document
-from .scripts import algs
+from .scripts import file
 import os
 
 # Create your views here.
@@ -12,8 +12,32 @@ def index(request):
 
 def upload(request):
     if request.method == 'POST':
-        form = DocumentForm(request.POST, request.FILES)
-        if form.is_valid():
+        
+        if request.FILES.get('document') :
+            form = DocumentForm(request.POST, request.FILES)
+            if form.is_valid():
+                all_docs=Document.objects.all()
+                for doc in all_docs:
+                    try:
+                        os.remove(doc.document.path)
+                    except:
+                        continue
+                Document.objects.all().delete()
+                form.save()
+                all_docs = Document.objects.all()
+                request.session['file_name']=all_docs[0].document.path
+
+                return render(request, 'upload.html', {
+                            'fileStatus': 'success',
+                            'file_uploaded':os.path.basename(request.session['file_name']),
+                            'data':file.get_data(request.session['file_name'])
+                        })
+            else:
+                return render(request, 'upload.html', {
+                    'fileStatus': 'fail',
+                    'form': True
+                })    
+        elif request.POST.get('delete') :
             all_docs=Document.objects.all()
             for doc in all_docs:
                 try:
@@ -21,30 +45,27 @@ def upload(request):
                 except:
                     continue
             Document.objects.all().delete()
-            form.save()
-            all_docs = Document.objects.all()
-            request.session['file_name']=all_docs[0].document.path
-            return render(request, 'upload.html', {
-                        'fileStatus': 'success'
-                    })
-        else:
-            form = DocumentForm()
-            return render(request, 'upload.html', {
-                'fileStatus': 'fail',
-                'form': form
-            })    
+            del request.session['file_name']
+            file_uploaded=False
+            return render(request, 'upload.html',{
+                'form': True,
+                'file_uploaded':file_uploaded
+            })
     else:
-        form = DocumentForm()
+        file_uploaded= os.path.basename(request.session['file_name']) if 'file_name' in request.session.keys() else False
+    
         return render(request, 'upload.html',{
-            'form': form
-        })
+                'form': True,
+                'file_uploaded':file_uploaded,
+                'data':file.get_data(request.session['file_name'])
+            })
+
 def apriori(request):
     try:
         print(request.session['file_name'])
-        algs.alg_apriori(request.session['file_name'])
     except:
         print("file not uploaded")
-    return render(request,"index.html")
+    return render(request,"apriori.html")
 
 def distancias(request):
     try:
