@@ -27,7 +27,7 @@ def frecuencia(file_name):
 
 def bar_frecuency(file_name):
     Lista=get_pandas_frecuency(file_name)
-    plt.figure(figsize=(12,18), dpi=300)
+    plt.figure(figsize=(12,20), dpi=300)
     plt.ylabel('Item')
     plt.xlabel('Frecuencia')
     plt.barh(Lista['Item'], width=Lista['Frecuencia'], color='#16ACC0')
@@ -35,3 +35,27 @@ def bar_frecuency(file_name):
     plt.savefig('algoritmos/static/assets/img/simulations/'+url)   # save the figure to file
     plt.close() 
     return url
+
+def get_rules(file_name,min_support_v,min_confidence_v,min_lift_v):
+    Datos = pd.read_csv(file_name, header=None)
+    DatosLista = Datos.stack().groupby(level=0).apply(list).tolist()
+    DatosLista 
+    ReglasC1 = apriori(DatosLista, 
+                   min_support=min_support_v, 
+                   min_confidence=min_confidence_v, 
+                   min_lift=min_lift_v)
+    ResultadosC1 = list(ReglasC1)
+    Rules_res=[]
+    for item in ResultadosC1:
+        #El primer índice de la lista
+        Emparejar = item[0]
+        items = [x for x in Emparejar]
+        Rules_res.append({
+            "regla":str(items) ,
+            "soporte": str(round(item[1],4)) ,
+            "confianza": str(round(item[2][0][2],4)) ,
+            "lift": str(round(item[2][0][3],4))
+            })
+    return Rules_res
+        
+    

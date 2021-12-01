@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Metricas de distancia</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Metodologías para medir distancias</li>
+                        </ol>
+                        {% if data and file_name %}
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <i class="fas fa-table me-1"></i>
+                                    Muestra de {{ file_name }}
+                                </div>
+                                <div class="card-body">
+                                    <table id="datatablesSimple">
+                                        {% for row in data %}
+                                            {% if forloop.first %} <!-- header de la tabla-->
+                                                <thead>
+                                                    <tr>
+                                                {% for col in row %}
+                                                        <th>{{ col }}</th>
+                                                {% endfor %}    
+                                                    </tr>
+                                                </thead>
+                                                <tfoot>
+                                                    <tr>
+                                                {% for col in row %}
+                                                        <th>{{ col }}</th>
+                                                {% endfor %}    
+                                                    </tr>
+                                                </tfoot>
+                                            {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                                <tbody>
+                                                    <tr>
+                                                {% for col in row %}
+                                                        <td>{{ col }}</td>        
+                                                {% endfor %}
+                                                    </tr>
+                                            {% else %} <!-- informacion extra -->
+                                                    <tr>
+                                                {% for col in row %}
+                                                        <td>{{ col }}</td>        
+                                                {% endfor %}
+                                                    </tr>
+                                            {% endif %}
+                                                
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <h2>Tipos de distancia</h2>
+                        <hr>
+                        <p>Eliga un metodo de distancia que aplicar</p>
+                        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row justify-content-center mb-3">
+                                <div class="btn-group mx-auto w-50" role="group">
+                                    {% if metrica == "euclidean" %}
+                                    <input type="radio" class="btn-check" name="metric" id="option1" value="euclidean" autocomplete="off" checked required>
+                                    {% else %}
+                                    <input type="radio" class="btn-check" name="metric" id="option1" value="euclidean" autocomplete="off" required>
+                                    {% endif %}
+                                    <label class="btn btn-outline-secondary" for="option1">Euclideano </label>
+                                    {% if metrica == "chebyshev" %}
+                                    <input type="radio" class="btn-check" name="metric" id="option2"value="chebyshev" autocomplete="off" checked>
+                                    {% else %}
+                                    <input type="radio" class="btn-check" name="metric" id="option2"value="chebyshev" autocomplete="off">
+                                    {% endif %}
+                                    <label class="btn btn-outline-secondary" for="option2">Chebyshev</label>
+                                    {% if metrica == "cityblock" %}
+                                    <input type="radio" class="btn-check" name="metric" id="option3"value="cityblock" autocomplete="off" checked>
+                                    {% else %}
+                                    <input type="radio" class="btn-check" name="metric" id="option3"value="cityblock" autocomplete="off">
+                                    {% endif %}
+                                    <label class="btn btn-outline-secondary" for="option3">Manhattan</label>
+                                    {% if metrica == "minkowski" %}
+                                    <input type="radio" class="btn-check" name="metric" id="option4"value="minkowski" autocomplete="off" checked>
+                                    {% else %}
+                                    <input type="radio" class="btn-check" name="metric" id="option4"value="minkowski" autocomplete="off">
+                                    {% endif %}
+                                    <label class="btn btn-outline-secondary" for="option4">Minkowski</label>
+                                </div>
+                            </div>
+                            <div class="w-25 mx-auto">
+                                <button type="submit" class="form-control btn btn-primary mb-3">Obtener Matriz</button>
+                            </div>
+                        </form>
+                        
+                        <br>
+                        {% if dst_matrix and metrica %}
+                        <h3>Matriz de distancias</h3>
+                        <hr>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                Tabla de distancias con {{metrica}}
+                            </div>
+                            <div class="card-body">
+                                <table id="datatable_dist">
+                                    {% for row in dst_matrix %}
+                                        {% if forloop.first %} <!-- header de la tabla-->
+                                            <thead>
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">#</th>
+                                                    <th>{{ col }}</th>
+                                                {% else %}
+                                                    <th>{{ col }}</th>
+                                                {% endif %}
+                                                    
+                                            {% endfor %}    
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">#</th>
+                                                    <th>{{ col }}</th>
+                                                {% else %}
+                                                    <th>{{ col }}</th>
+                                                {% endif %}
+                                            {% endfor %}    
+                                                </tr>
+                                            </tfoot>
+                                        {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                            <tbody>
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">{{ forloop.parentloop.counter0|add:"-1" }}</th>
+                                                    <td>{{ col }}</td>
+                                                {% else %}
+                                                    <td>{{ col }}</td>
+                                                {% endif %}
+                                                            
+                                            {% endfor %}
+                                                </tr>
+                                        {% else %} <!-- informacion extra -->
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">{{ forloop.parentloop.counter0|add:"-1" }}</th>
+                                                    <td>{{ col }}</td>
+                                                {% else %}
+                                                    <td>{{ col }}</td>
+                                                {% endif %}
+                                            {% endfor %}
+                                                </tr>
+                                        {% endif %}
+                                            
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <h3>Distancia entre vectores</h3>
+                        <hr>
+                        <p>Obtener distancia entre dos vectores</p>
+                        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row g-3">
+                                <div class="input-group mb-3 col">
+                                    <span class="input-group-text" id="inputGroup-vector1">Vector 1</span>
+                                    <input type="number" class="form-control" name="vector1" min="0" aria-describedby="inputGroup-vector1" value="10">
+                                </div>
+                                <div class="input-group mb-3 col">
+                                    <span class="input-group-text" id="inputGroup-vector2">Vector 2</span>
+                                    <input type="number" class="form-control" name="vector2" min="0" aria-describedby="inputGroup-vector2" value="20">
+                                </div>
+                            </div>
+                            <div class="w-25 mx-auto">
+                                <button type="submit" class="form-control btn btn-primary mb-3">Obtener distancia</button>
+                            </div>
+                        </form>
+
+                        {% if single_distance and vector1 >= 0 and vector2 >= 0 and metrica %}
+                        <div class="alert alert-success" role="alert">
+                            La distancia entre Vector[<strong>{{vector1}}</strong>] y Vector[<strong>{{vector2}}</strong>] con <strong>{{metrica}}</strong> es : {{single_distance}}
+                        </div>
+                        {% endif %}
+
+
+                        {% endif %} <!--- end if dst_matrix -->
+
+                        {% endif %} <!--- end if data and filename -->
+
+
+                       
+                    </div>
+                </main>
+{% endblock %}

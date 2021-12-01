@@ -52,17 +52,21 @@
                                     </table>
                                 </div>
                             </div>
-                            
+                        <h2>Exploración</h2>
+                        <hr>                            
                         {% endif %}
-                        <h3>Exploración</h3>
+
+                        
                         {% if frecuency_table %}
+                        <h3>Tabla de frecuencias</h3>
+                        <br>
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-table me-1"></i>
                                 Tabla de frecuencias
                             </div>
                             <div class="card-body">
-                                <table id="datatablesSimple">
+                                <table id="datatableFrecuency">
                                     {% for row in frecuency_table %}
                                         {% if forloop.first %} <!-- header de la tabla-->
                                             <thead>
@@ -100,72 +104,58 @@
                             </div>
                         </div>
                         {% endif %}
-
+                        
                         {% if image_frecuency_url %}
+                        <h3>Imagen de frecuencias</h3>
                         <div>
                             <img src="{% static 'assets/img/simulations/' %}{{image_frecuency_url}}" class="img-fluid" alt="Barra de frecuencias">
                         </div>
-                            
                         {% endif %}
-                        <div class="row">
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-primary text-white mb-4">
-                                    <div class="card-body">Primary Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        {% if data and file_name %}
+                        <h2>Aplicación del algoritmo</h2>
+                        <hr>
+                        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row g-3">
+                                <div class="input-group mb-3 col">
+                                    <span class="input-group-text" id="inputGroup-min-support">Soporte mínimo</span>
+                                    <input type="number" class="form-control" name="min_support" step="0.0001" aria-label="Sizing example input" aria-describedby="inputGroup-min-support" value="0.01">
+                                </div>
+                                <div class="input-group mb-3 col">
+                                    <span class="input-group-text" id="inputGroup-min-confidence">Confianza mínima</span>
+                                    <input type="number" class="form-control" name="min_confidence" step="0.0001" aria-label="Sizing example input" aria-describedby="inputGroup-min-confidence" value="0.3">
+                                </div>
+                                <div class="input-group mb-3 col">
+                                    <span class="input-group-text" id="inputGroup-min-lift">Elevación</span>
+                                    <input type="number" class="form-control" name="min_lift" step="0.0001" aria-label="Sizing example input" aria-describedby="inputGroup-min-lift" value="2">
+                                </div>    
+                            </div>
+                            <div class="w-50 mx-auto">
+                                <button type="submit" class="form-control btn btn-primary mb-3">Generar modelo</button>
+                            </div>
+                        </form>
+                        {% endif %}
+                        {% if lista_rules %}
+                        <h2 class="mt-5">Lista de reglas de asociación</h2>
+                        <hr>
+                        <div class="row row-cols-1 row-cols-md-4 g-4 my-5">
+                            {% for rule in lista_rules %}
+                            <div class="col">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                    <h5 class="card-title">Regla {{ forloop.counter }}</h5>
+                                    <p class="card-text">{{ rule.regla }}</p>
                                     </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Soporte: <span class="badge bg-secondary text-light">{{rule.soporte}}</span> </li>
+                                        <li class="list-group-item">Confianza: <span class="badge bg-info text-dark">{{rule.confianza}}</span></li>
+                                        <li class="list-group-item">Lift: <span class="badge bg-warning text-dark">{{rule.lift}}</span></li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
-                                    <div class="card-body">Warning Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-success text-white mb-4">
-                                    <div class="card-body">Success Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">Danger Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                        </div>
-                        
+                        {% endif %}
+                                             
                     </div>
                 </main>
 {% endblock %}
