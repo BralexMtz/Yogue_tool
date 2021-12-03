@@ -5,6 +5,7 @@ from .models import Document
 from .scripts import file
 from .scripts import apriori_mod
 from .scripts import metric_mod
+from .scripts import clst_jrq_mod
 import os
 from random import sample
 
@@ -128,29 +129,90 @@ def distancias(request):
     else:
         return render(request,"metricas_distancias.html")    
     
-    try:
-        print(request.session['file_name'])
-    except:
-        print("file not uploaded")
-    return render(request,"index.html")
 
 def cluster_jerarquico(request):
-    
-    return render(request,"index.html")
+    if 'file_name' in request.session.keys():
+        if request.POST:
+            if request.POST.get('predictoras'):
+                request.session['column_list']=request.POST.getlist('predictoras')
+                dendograma_url = clst_jrq_mod.get_dendograma_url(request.session['file_name'],request.session['column_list'])
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"cluster_jerarquico.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': M_corr[0][1::],
+                    'dendograma_url':dendograma_url
+                })
+            elif request.POST.get('numClusters'):
+                numClusters=request.POST['numClusters']
+                dataEtq,list_clusters=clst_jrq_mod.get_cluster_data(request.session['file_name'],request.session['column_list'],int(numClusters))
+
+                dendograma_url = clst_jrq_mod.get_dendograma_url(request.session['file_name'],request.session['column_list'])
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"cluster_jerarquico.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': M_corr[0][1::], #columnas posibles
+                    'dendograma_url':dendograma_url,
+                    'list_clusters': list_clusters,
+                    'dataCluster': dataEtq
+                })
+            else:
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"cluster_jerarquico.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': M_corr[0][1::]
+                })
+        else:
+            M_corr=file.get_matriz_corr(request.session['file_name'])
+            return render(request,"cluster_jerarquico.html",{
+                'file_name':os.path.basename(request.session['file_name']),
+                'data': file.get_data(request.session['file_name'])[0:20],
+                'Matriz_corr': M_corr,
+                'heatmap_url': file.get_heatmap(request.session['file_name']),
+                'variables': M_corr[0][1::]
+            })
+    else:
+        return render(request,"cluster_jerarquico.html")
 
 def cluster_particional(request):
-    
-    return render(request,"index.html")
+    if 'file_name' in request.session.keys():
+        if request.POST:
+            next
+        else:
+            M_corr=file.get_matriz_corr(request.session['file_name'])
+            return render(request,"cluster_jerarquico.html",{
+                'file_name':os.path.basename(request.session['file_name']),
+                'data': file.get_data(request.session['file_name'])[0:20],
+                'Matriz_corr': M_corr,
+                'heatmap_url': file.get_heatmap(request.session['file_name']),
+                'variables': M_corr[0][1::]
+            })
+    else:
+        return render(request,"cluster_particional.html")
 
 def clasif_rlog(request):
-    
-    return render(request,"index.html")
+    if 'file_name' in request.session.keys():    
+        next
+    else:
+        return render(request,"index.html")
 
 def a_pronostico(request):
-    
-    return render(request,"index.html")
+    if 'file_name' in request.session.keys():    
+        next
+    else:
+        return render(request,"index.html")
 
 def a_clasif(request):
-    
-    return render(request,"index.html")
+    if 'file_name' in request.session.keys():    
+        next
+    else:
+        return render(request,"index.html")
 

@@ -14,4 +14,13 @@ window.addEventListener('DOMContentLoaded', event => {
     if (datatableDistance) {
         new simpleDatatables.DataTable(datatableDistance,{searchable:false});
     }
+    const datatableCorr = document.getElementById('datatableCorr');
+    if (datatableCorr) {
+        new simpleDatatables.DataTable(datatableCorr,{searchable:false});
+    }
+    const datatableCluster = document.getElementById('datatableCluster');
+    if (datatableCluster) {
+        var table = new simpleDatatables.DataTable(datatableCluster,{searchable:false});
+        
+    }
 });
