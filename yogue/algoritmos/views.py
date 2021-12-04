@@ -6,6 +6,7 @@ from .scripts import file
 from .scripts import apriori_mod
 from .scripts import metric_mod
 from .scripts import clst_jrq_mod
+from .scripts import clst_part_mod
 import os
 from random import sample
 
@@ -185,10 +186,46 @@ def cluster_jerarquico(request):
 def cluster_particional(request):
     if 'file_name' in request.session.keys():
         if request.POST:
-            next
+            if request.POST.get('predictoras'):
+                request.session['column_list']=request.POST.getlist('predictoras')
+                best_n = clst_part_mod.get_best_n_cluster(request.session['file_name'],request.session['column_list'])
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"cluster_particional.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': M_corr[0][1::],
+                    'best_n': best_n
+                })
+            elif request.POST.get('numClusters'):
+                numClusters=request.POST['numClusters']
+                dataEtq,list_clusters=clst_part_mod.get_cluster_data(request.session['file_name'],request.session['column_list'],int(numClusters))
+
+                best_n = clst_part_mod.get_best_n_cluster(request.session['file_name'],request.session['column_list'])
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"cluster_particional.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': M_corr[0][1::], #columnas posibles
+                    'best_n': best_n,
+                    'list_clusters': list_clusters,
+                    'dataCluster': dataEtq
+                })
+            else:
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"cluster_particional.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': M_corr[0][1::]
+                })
         else:
             M_corr=file.get_matriz_corr(request.session['file_name'])
-            return render(request,"cluster_jerarquico.html",{
+            return render(request,"cluster_particional.html",{
                 'file_name':os.path.basename(request.session['file_name']),
                 'data': file.get_data(request.session['file_name'])[0:20],
                 'Matriz_corr': M_corr,
