@@ -23,4 +23,9 @@ window.addEventListener('DOMContentLoaded', event => {
         var table = new simpleDatatables.DataTable(datatableCluster,{searchable:false});
         
     }
+    const datatableClasif = document.getElementById('datatableClasif');
+    if (datatableClasif) {
+        var table = new simpleDatatables.DataTable(datatableClasif,{searchable:false});
+        
+    }
 });

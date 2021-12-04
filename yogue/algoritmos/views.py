@@ -7,6 +7,7 @@ from .scripts import apriori_mod
 from .scripts import metric_mod
 from .scripts import clst_jrq_mod
 from .scripts import clst_part_mod
+from .scripts import clasif_rlog_mod
 import os
 from random import sample
 
@@ -130,7 +131,6 @@ def distancias(request):
     else:
         return render(request,"metricas_distancias.html")    
     
-
 def cluster_jerarquico(request):
     if 'file_name' in request.session.keys():
         if request.POST:
@@ -237,9 +237,35 @@ def cluster_particional(request):
 
 def clasif_rlog(request):
     if 'file_name' in request.session.keys():    
-        next
+        if request.POST:
+            if request.POST.get('predictoras') and request.POST.get('clase') and request.POST.get('test-size'):
+                request.session['column_list']=request.POST.getlist('predictoras')
+                request.session['predictora']=request.POST['clase']
+                request.session['test-size']=request.POST['test-size']
+                score,Matriz_Clasificacion,report,ecuacion= clasif_rlog_mod.get_model(request.session['file_name'],request.session['column_list'],request.session['predictora'],float(request.session['test-size']))
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"clasif_r_log.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': file.get_data(request.session['file_name'])[0][1::],
+                    'score':score,
+                    'Matriz_Clasificacion': Matriz_Clasificacion,
+                    'reporte':report,
+                    'ecuacion':ecuacion
+                })
+        else:
+            M_corr=file.get_matriz_corr(request.session['file_name'])
+            return render(request,"clasif_r_log.html",{
+                'file_name':os.path.basename(request.session['file_name']),
+                'data': file.get_data(request.session['file_name'])[0:20],
+                'Matriz_corr': M_corr,
+                'heatmap_url': file.get_heatmap(request.session['file_name']),
+                'variables': file.get_data(request.session['file_name'])[0][1::]
+            })
     else:
-        return render(request,"index.html")
+        return render(request,"clasif_r_log.html")
 
 def a_pronostico(request):
     if 'file_name' in request.session.keys():    

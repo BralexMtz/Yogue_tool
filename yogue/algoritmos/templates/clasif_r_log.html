@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Clasificación con R Logistica</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Regresión Logistica</li>
+                        </ol>
+                        {% if data and file_name %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                Muestra de {{ file_name }}
+                            </div>
+                            <div class="card-body">
+                                <table id="datatablesSimple">
+                                    {% for row in data %}
+                                        {% if forloop.first %} <!-- header de la tabla-->
+                                            <thead>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </tfoot>
+                                        {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                            <tbody>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% else %} <!-- informacion extra -->
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% endif %}
+                                            
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        {% if Matriz_corr %}
+                        <h2>Matriz correlacional</h2>
+                        <hr>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                Matriz correlacional
+                            </div>
+                            <div class="card-body">
+                                <table id="datatableCorr">
+                                    {% for row in Matriz_corr %}
+                                        {% if forloop.first %} <!-- header de la tabla-->
+                                            <thead>
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">{{ col }}</th>   
+                                                {% else %}
+                                                    <th>{{ col }}</th>        
+                                                {% endif %}
+
+                                            {% endfor %}    
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">{{ col }}</th>   
+                                                {% else %}
+                                                    <th>{{ col }}</th>        
+                                                {% endif %}
+                                            {% endfor %}    
+                                                </tr>
+                                            </tfoot>
+                                        {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                            <tbody>
+                                                <tr>
+                                            {% for col in row %}
+                                                    {% if forloop.first %}
+                                                        <th scope="row">{{ col }}</th>   
+                                                    {% else %}
+                                                        <td>{{ col }}</td>        
+                                                    {% endif %}     
+                                            {% endfor %}
+                                                </tr>
+                                        {% else %} <!-- informacion extra -->
+                                                <tr>
+                                            {% for col in row %}
+                                                {% if forloop.first %}
+                                                    <th scope="row">{{ col }}</th>   
+                                                {% else %}
+                                                    <td>{{ col }}</td>        
+                                                {% endif %}       
+                                            {% endfor %}
+                                                </tr>
+                                        {% endif %}
+                                            
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}<!--END if Matriz_corr-->
+
+                        {% if heatmap_url %}
+                        <h3>Mapa de calor</h3>
+                        <div class="mx-auto w-75">
+                            <img src="{% static 'assets/img/simulations/' %}{{heatmap_url}}" class="img-fluid" alt="Mapa de calor">
+                        </div>
+
+                        <h2>Seleccion de caracteristicas</h2>
+                        <hr>
+                        <section class="ftco-section">
+                            <div class="container">
+                                {% if variables %}
+                                <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <h2 class="heading-section pb-md-4">Escoge las variables predictoras</h2>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-8">
+                                            <ul class="ks-cboxtags">
+                                            {% for var in variables %}
+                                                <li>
+                                                    <input type="checkbox" id="check{{var}}" name="predictoras" value="{{var}}">
+                                                    <label for="check{{var}}">{{var}}</label>
+                                                </li>
+                                            {% endfor %}        
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <h2 class="heading-section pb-md-4">Escoge la variable de clase</h2>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-center mb-3">
+                                        <div class="btn-group" role="group">
+                                            {% for var in variables %}
+                                            <input type="radio" class="btn-check" name="clase" id="option_{{var}}" value="{{var}}" autocomplete="off" required>                                            
+                                            <label class="btn btn-outline-success" for="option_{{var}}">{{var}}</label>    
+                                            {% endfor %}   
+                                        </div>                                    
+                                    </div>
+                                    <div class="row justify-content-center g-3 mb-3">
+                                        <div class="col-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="inputGroup-test-size">Tamaño de prueba</span>
+                                                <input type="number" class="form-control" name="test-size" step="0.0001" aria-label="Sizing example input" aria-describedby="inputGroup-test-size" value="0.2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="w-25 mx-auto">
+                                        <button type="submit" class="form-control btn btn-primary mb-3">Subir</button>
+                                    </div>
+                                </form>
+                                {% endif %}<!--END if variables-->
+                            </div>
+                        </section>                        
+
+                        {% if score %}
+                        <h2>Resultados</h2>
+                        <hr>
+                        <h4 class="text-center">Efectividad del modelo: <span class="badge bg-success">{{score}}%</span></h4>
+                        {% endif %}
+
+                        {% if Matriz_Clasificacion %}
+                        
+                        <div class="card w-50 mb-4 mx-auto">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                <strong>Matriz de Clasificación</strong>        
+                            </div>
+                            <div class="card-body">
+                                <table id="datatableClasif">
+                                    {% for row in Matriz_Clasificacion %}
+                                        {% if forloop.first %} <!-- header de la tabla-->
+                                            <thead>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </tfoot>
+                                        {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                            <tbody>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% else %} <!-- informacion extra -->
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% endif %}
+                                            
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        {% endif %}
+                        
+                        {% if reporte %}
+                        <h4 class="text-center">Reporte</h4>
+                        <div class="card w-50 mx-auto">
+                            <div class="card-body">
+                               <pre>{{reporte}}</pre> 
+                            </div>
+                         </div>
+                        {% endif %}
+
+                        {% if ecuacion %}
+                        <h4 class="text-center" >Ecuacion</h4>
+                        <div class="alert alert-secondary" role="alert">
+                            <pre>Prob = 1/1+𝑒^−(𝑎+𝑏𝑋)</pre>
+                            <var>a</var>+<var>b</var><var>X</var>= {{ecuacion}}
+                          </div>
+                        {% endif %}
+                        
+
+                        {% endif %} <!--END if heatmap_url-->
+
+                        
+
+                        {% endif %} <!--- END if data and filename -->
+
+
+                    </div>
+                </main>
+{% endblock %}
