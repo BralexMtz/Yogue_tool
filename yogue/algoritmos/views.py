@@ -249,7 +249,7 @@ def clasif_rlog(request):
                     'data': file.get_data(request.session['file_name'])[0:20],
                     'Matriz_corr': M_corr,
                     'heatmap_url': file.get_heatmap(request.session['file_name']),
-                    'variables': file.get_data(request.session['file_name'])[0][1::],
+                    'variables': file.get_data(request.session['file_name'])[0][::],
                     'score':score,
                     'Matriz_Clasificacion': Matriz_Clasificacion,
                     'reporte':report,
@@ -262,16 +262,25 @@ def clasif_rlog(request):
                 'data': file.get_data(request.session['file_name'])[0:20],
                 'Matriz_corr': M_corr,
                 'heatmap_url': file.get_heatmap(request.session['file_name']),
-                'variables': file.get_data(request.session['file_name'])[0][1::]
+                'variables': file.get_data(request.session['file_name'])[0][::]
             })
     else:
         return render(request,"clasif_r_log.html")
 
 def a_pronostico(request):
-    if 'file_name' in request.session.keys():    
-        next
+    if 'file_name' in request.session.keys():
+        # hacer post y entrenamiento
+
+        M_corr=file.get_matriz_corr(request.session['file_name'])
+        return render(request,"arboles_pronostico.html",{
+            'file_name':os.path.basename(request.session['file_name']),
+            'data': file.get_data(request.session['file_name'])[0:20],
+            'Matriz_corr': M_corr,
+            'heatmap_url': file.get_heatmap(request.session['file_name']),
+            'variables': file.get_data(request.session['file_name'])[0][::]
+        })    
     else:
-        return render(request,"index.html")
+        return render(request,"arboles_pronostico.html")
 
 def a_clasif(request):
     if 'file_name' in request.session.keys():    
@@ -279,3 +288,25 @@ def a_clasif(request):
     else:
         return render(request,"index.html")
 
+def prediccion(request):
+    if all(x in request.session.keys() for x in ['file_name','column_list', 'predictora','test-size']): 
+        #modelo Clasif. R Logistica
+        if request.POST:
+            if all(x in request.POST for x in request.session['column_list']):
+                variables= {}
+                for key,value in list(request.POST.items()):
+                    if key in request.session['column_list']:
+                        variables[key]=[float(value)]
+                resultado=clasif_rlog_mod.predict(request.session['file_name'],request.session['column_list'],request.session['predictora'],float(request.session['test-size']),variables)
+                #resultado= "Maligno" if resultado=="M" else "Benigno"
+                return render(request,"prediccion.html",{
+                'vars':  request.session['column_list'],
+                'result': resultado
+                })
+        else:
+
+            return render(request,"prediccion.html",{
+            'vars':  request.session['column_list']
+            })
+    else:
+        return render(request,"prediccion.html")

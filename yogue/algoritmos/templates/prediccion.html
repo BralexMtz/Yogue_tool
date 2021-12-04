@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Predicción</h1>
+                        {% if vars %}
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Ingrese los datos para predecir</li>
+                        </ol>
+                        <hr>
+                        <form method="post" class="mb-5" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="container">
+                                <div class="row mx-5">
+                                    {% for var in vars %}
+                                    <div class="col-md-4 my-2">
+                                      <div class="form-floating">
+                                        <input type="number" name="{{var}}" class="form-control" id="floatingInput_{{var}}" placeholder="{{var}}" value="" step="0.000001" required>
+                                        <label for="floatingInput_{{var}}">{{var}}</label>
+                                      </div>
+                                    </div>
+                                    {% endfor %}
+                                    <div class="w-25 mx-auto">
+                                        <button type="submit" class="form-control btn btn-primary mb-3">Obtener Prediccion</button>
+                                    </div>
+                                </div>
+                            </div>    
+                        </form>
+                        {% endif %}
+                        {% if result %}
+                        <div class="alert alert-info" role="alert">
+                            El resultado es: <strong>{{result}}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </main>
+{% endblock %}

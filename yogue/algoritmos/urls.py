@@ -14,4 +14,5 @@ urlpatterns=[
     path('arboles-de-pronostico',views.a_pronostico,name='a_pronostico'),
     path('arboles-de-clasificacion',views.a_clasif,name='a_clasif'),
     path('upload-files',views.upload,name='upload'),
+    path('prediccion',views.prediccion,name='prediccion'),
 ]

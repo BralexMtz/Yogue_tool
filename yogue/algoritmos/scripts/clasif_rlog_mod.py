@@ -38,3 +38,18 @@ def get_model(file_name,list_x,val_y,test_size):
 
     return score*100,Matriz_Clasificacion_list,classification_report(Y_validation, Y_Clasificacion),ecuacion
 
+def predict(file_name,list_x,val_y,test_size,dict_data):
+    BCancer = pd.read_csv(file_name)
+    X = np.array(BCancer[list_x])
+    Y = np.array(BCancer[[val_y]])
+    X_train, X_validation, Y_train, Y_validation = model_selection.train_test_split(X, Y, 
+                                                                                test_size = test_size, #cuanto para validar el modelo.
+                                                                                random_state = 1234,
+                                                                                shuffle = True)
+    Clasificacion = linear_model.LogisticRegression()
+    Clasificacion.fit(X_train, Y_train.ravel())
+    PacienteID1 = pd.DataFrame(dict_data)
+    result= Clasificacion.predict(PacienteID1)[0]
+    return result
+
+    
