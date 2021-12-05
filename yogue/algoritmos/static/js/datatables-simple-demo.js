@@ -28,4 +28,10 @@ window.addEventListener('DOMContentLoaded', event => {
         var table = new simpleDatatables.DataTable(datatableClasif,{searchable:false});
         
     }
+    const datatableImportancia = document.getElementById('datatableImportancia');
+    if (datatableImportancia) {
+        var table = new simpleDatatables.DataTable(datatableImportancia,{searchable:false});
+        
+    }
+    
 });

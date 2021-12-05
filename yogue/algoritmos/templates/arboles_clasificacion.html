@@ -4,9 +4,9 @@
 {% block content %}
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Clasificación con R Logistica</h1>
+                        <h1 class="mt-4">Arboles de decisión</h1>
                         <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Regresión Logistica</li>
+                            <li class="breadcrumb-item active">Clasificación</li>
                         </ol>
                         {% if data and file_name %}
                         <div class="card mb-4">
@@ -149,7 +149,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 text-center">
-                                            <h2 class="heading-section pb-md-4">Escoge la variable de clase</h2>
+                                            <h2 class="heading-section pb-md-4">Escoge la variable a pronosticar</h2>
                                         </div>
                                     </div>
                                     <div class="row justify-content-center mb-3">
@@ -168,8 +168,33 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <h2 class="heading-section pb-md-4">Datos del arbol</h2>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-center g-3 mb-3">
+                                        <div class="col-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="inputGroup-max-depth">Profundidad Maxima</span>
+                                                <input type="number" class="form-control" name="max_depth" min="0" aria-label="Sizing example input" aria-describedby="inputGroup-max-depth" value="8">
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="inputGroup-min-split">Minimo de elementos en nodos</span>
+                                                <input type="number" class="form-control" name="min_split" min="0" aria-label="Sizing example input" aria-describedby="inputGroup-min-split" value="4">
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="inputGroup-min-leaf">Minimo de elementos por hoja</span>
+                                                <input type="number" class="form-control" name="min_leaf" min="0" aria-label="Sizing example input" aria-describedby="inputGroup-min-leaf" value="2">
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="w-25 mx-auto">
-                                        <button type="submit" class="form-control btn btn-primary mb-3">Subir</button>
+                                        <button type="submit" class="form-control btn btn-primary mb-3">Generar modelo</button>
                                     </div>
                                 </form>
                                 {% endif %}<!--END if variables-->
@@ -182,8 +207,16 @@
                         <h4 class="text-center">Efectividad del modelo: <span class="badge bg-success">{{score}}%</span></h4>
                         {% endif %}
 
-                        {% if Matriz_Clasificacion %}
+                        {% if reporte %}
+                        <h4 class="text-center">Reporte</h4>
+                        <div class="card w-50 mx-auto">
+                            <div class="card-body">
+                               <pre>{{reporte}}</pre> 
+                            </div>
+                         </div>
+                        {% endif %}
                         
+                        {% if Matriz_Clasificacion %}            
                         <div class="card w-50 mb-4 mx-auto">
                             <div class="card-header">
                                 <i class="fas fa-table me-1"></i>
@@ -227,25 +260,65 @@
                                 </table>
                             </div>
                         </div>
-
-
                         {% endif %}
                         
-                        {% if reporte %}
-                        <h4 class="text-center">Reporte</h4>
-                        <div class="card w-50 mx-auto">
-                            <div class="card-body">
-                               <pre>{{reporte}}</pre> 
-                            </div>
-                         </div>
-                        {% endif %}
 
-                        {% if ecuacion %}
-                        <h4 class="text-center" >Ecuacion</h4>
-                        <div class="alert alert-secondary" role="alert">
-                            <pre>Prob = 1/1+𝑒^−(𝑎+𝑏𝑋)</pre>
-                            <var>a</var>+<var>b</var><var>X</var>= {{ecuacion}}
+
+                        {% if Importancia %}
+                        <div class="card w-50 mx-auto">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                Tabla de Importancia
+                            </div>
+                            <div class="card-body">
+                                <table id="datatableImportancia">
+                                    {% for row in Importancia %}
+                                        {% if forloop.first %} <!-- header de la tabla-->
+                                            <thead>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </tfoot>
+                                        {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                            <tbody>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% else %} <!-- informacion extra -->
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% endif %}
+                                            
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                        {% endif %}<!--END if Importancia-->
+                        
+                        {% if arbol_url %}
+                        <h3>Arbol de decisión</h3>
+                        <div class="mx-auto w-75">
+                            <img src="{% static 'assets/img/simulations/' %}{{arbol_url}}" class="img-fluid" alt="Arbol">
+                        </div>
+                        {% endif %}<!--END if arbol_url-->
+
+
+                        {% if score %}
                         <!-- Button trigger modal -->
                         <div class="w-25 mx-auto mb-5">
                             <a href="{% url 'algoritmos:prediccion' %}" target="_blank">
@@ -254,11 +327,8 @@
                                 </button>        
                             </a>                                    
                         </div>
-                        
 
-                        
-                        {% endif %}
-                        
+                        {% endif %}<!--END if score-->
 
                         {% endif %} <!--END if heatmap_url-->
 

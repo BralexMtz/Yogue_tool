@@ -8,12 +8,13 @@ from .scripts import metric_mod
 from .scripts import clst_jrq_mod
 from .scripts import clst_part_mod
 from .scripts import clasif_rlog_mod
+from .scripts import arbol_pronostico_mod
+from .scripts import arbol_clasificacion_mod
 import os
 from random import sample
 
 # Create your views here.
 def index(request):
-    
     return render(request,"index.html")
 
 def upload(request):
@@ -240,9 +241,8 @@ def clasif_rlog(request):
         if request.POST:
             if request.POST.get('predictoras') and request.POST.get('clase') and request.POST.get('test-size'):
                 request.session['column_list']=request.POST.getlist('predictoras')
-                request.session['predictora']=request.POST['clase']
-                request.session['test-size']=request.POST['test-size']
-                score,Matriz_Clasificacion,report,ecuacion= clasif_rlog_mod.get_model(request.session['file_name'],request.session['column_list'],request.session['predictora'],float(request.session['test-size']))
+                request.session['algoritmo']= "clasif_rlog"
+                score,Matriz_Clasificacion,report,ecuacion= clasif_rlog_mod.get_model(request.session['file_name'],request.session['column_list'],request.POST['clase'],float(request.POST['test-size']))
                 M_corr=file.get_matriz_corr(request.session['file_name'])
                 return render(request,"clasif_r_log.html",{
                     'file_name':os.path.basename(request.session['file_name']),
@@ -269,44 +269,133 @@ def clasif_rlog(request):
 
 def a_pronostico(request):
     if 'file_name' in request.session.keys():
-        # hacer post y entrenamiento
-
-        M_corr=file.get_matriz_corr(request.session['file_name'])
-        return render(request,"arboles_pronostico.html",{
-            'file_name':os.path.basename(request.session['file_name']),
-            'data': file.get_data(request.session['file_name'])[0:20],
-            'Matriz_corr': M_corr,
-            'heatmap_url': file.get_heatmap(request.session['file_name']),
-            'variables': file.get_data(request.session['file_name'])[0][::]
-        })    
+        if request.POST:
+            if all(x in request.POST for x in ['predictoras','clase','test-size','max_depth','min_split','min_leaf']):
+                request.session['column_list']=request.POST.getlist('predictoras')
+                MAE,MSE,RMSE,score,Importancia,url=arbol_pronostico_mod.get_model(request.session['file_name'],
+                                                request.session['column_list'],request.POST['clase'],float(request.POST['test-size']),
+                                                int(request.POST['max_depth']),int(request.POST['min_split']),int(request.POST['min_leaf']))
+                request.session['algoritmo']= "a_pronostico"
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"arboles_pronostico.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': file.get_data(request.session['file_name'])[0][::],
+                    # valores del modelo
+                    'score':score,
+                    'Importancia': Importancia,
+                    'MAE':MAE,
+                    'MSE':MSE,
+                    'RMSE':RMSE,
+                    'arbol_url':url
+                })
+            else:
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"arboles_pronostico.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': file.get_data(request.session['file_name'])[0][::]
+                })    
+        else:
+            M_corr=file.get_matriz_corr(request.session['file_name'])
+            return render(request,"arboles_pronostico.html",{
+                'file_name':os.path.basename(request.session['file_name']),
+                'data': file.get_data(request.session['file_name'])[0:20],
+                'Matriz_corr': M_corr,
+                'heatmap_url': file.get_heatmap(request.session['file_name']),
+                'variables': file.get_data(request.session['file_name'])[0][::]
+            })    
     else:
         return render(request,"arboles_pronostico.html")
 
 def a_clasif(request):
-    if 'file_name' in request.session.keys():    
-        next
+    if 'file_name' in request.session.keys():
+        if request.POST:
+            if all(x in request.POST for x in ['predictoras','clase','test-size','max_depth','min_split','min_leaf']):
+                request.session['column_list']=request.POST.getlist('predictoras')
+                score,reporte,Matriz_Clasificacion_list,Importancia,url=arbol_clasificacion_mod.get_model(request.session['file_name'],
+                                                request.session['column_list'],request.POST['clase'],float(request.POST['test-size']),
+                                                int(request.POST['max_depth']),int(request.POST['min_split']),int(request.POST['min_leaf']))
+                request.session['algoritmo']= "a_clasificacion"
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"arboles_clasificacion.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': file.get_data(request.session['file_name'])[0][::],
+                    # valores del modelo
+                    'score':score,
+                    'reporte':reporte,
+                    'Matriz_clasificacion':Matriz_Clasificacion_list,
+                    'Importancia': Importancia,
+                    'arbol_url':url
+                })
+            else:
+                M_corr=file.get_matriz_corr(request.session['file_name'])
+                return render(request,"arboles_clasificacion.html",{
+                    'file_name':os.path.basename(request.session['file_name']),
+                    'data': file.get_data(request.session['file_name'])[0:20],
+                    'Matriz_corr': M_corr,
+                    'heatmap_url': file.get_heatmap(request.session['file_name']),
+                    'variables': file.get_data(request.session['file_name'])[0][::]
+                })    
+        else:
+            M_corr=file.get_matriz_corr(request.session['file_name'])
+            return render(request,"arboles_clasificacion.html",{
+                'file_name':os.path.basename(request.session['file_name']),
+                'data': file.get_data(request.session['file_name'])[0:20],
+                'Matriz_corr': M_corr,
+                'heatmap_url': file.get_heatmap(request.session['file_name']),
+                'variables': file.get_data(request.session['file_name'])[0][::]
+            })    
     else:
-        return render(request,"index.html")
+        return render(request,"arboles_clasificacion.html")
 
 def prediccion(request):
-    if all(x in request.session.keys() for x in ['file_name','column_list', 'predictora','test-size']): 
-        #modelo Clasif. R Logistica
+    modelos={
+        "clasif_rlog":"Clasificacion con Regresión Logistica",
+        "a_pronostico": "Arbol de decisión (Pronostico)",
+        "a_clasificacion": "Arbol de decisión (Clasificación)"
+    }
+    if all(x in request.session.keys() for x in ['file_name','algoritmo']): 
+    
         if request.POST:
             if all(x in request.POST for x in request.session['column_list']):
                 variables= {}
                 for key,value in list(request.POST.items()):
                     if key in request.session['column_list']:
                         variables[key]=[float(value)]
-                resultado=clasif_rlog_mod.predict(request.session['file_name'],request.session['column_list'],request.session['predictora'],float(request.session['test-size']),variables)
+                if request.session['algoritmo'] == "clasif_rlog":
+                    resultado=clasif_rlog_mod.predict(variables)
+                elif request.session['algoritmo'] == "a_pronostico":
+                    resultado=arbol_pronostico_mod.predict(variables)
+                elif request.session['algoritmo'] == "a_clasificacion":
+                    resultado=arbol_clasificacion_mod.predict(variables)
+                else:
+                    print("algoritmo en session elegido incorrecto")
+                print(resultado)
                 #resultado= "Maligno" if resultado=="M" else "Benigno"
                 return render(request,"prediccion.html",{
                 'vars':  request.session['column_list'],
-                'result': resultado
+                'algoritmo': modelos[request.session['algoritmo']],
+                'result': str(resultado)
+                })
+            else:
+                print("No estan todas las variables predictoras")
+                return render(request,"prediccion.html",{
+                'vars':  request.session['column_list'],
+                'algoritmo': modelos[request.session['algoritmo']]
                 })
         else:
-
+            print("No hubo post")
             return render(request,"prediccion.html",{
-            'vars':  request.session['column_list']
+            'vars':  request.session['column_list'],
+            'algoritmo': modelos[request.session['algoritmo']]
             })
     else:
         return render(request,"prediccion.html")

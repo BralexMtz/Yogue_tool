@@ -205,10 +205,81 @@
                         <h2>Resultados</h2>
                         <hr>
                         <h4 class="text-center">Efectividad del modelo: <span class="badge bg-success">{{score}}%</span></h4>
+                            {% if MAE and MSE and RMSE %}
+                            <div class="alert alert-secondary text-center w-50 mx-auto" role="alert">                                
+                                <p class="text-secondary">Un MAE de <strong>{{MAE}}</strong></p>
+                                <p class="text-secondary">Un MSE de <strong>{{MSE}}</strong></p>
+                                <p class="text-secondary">Un RMSE de <strong>{{RMSE}}</strong></p>
+                            </div>
+                            {% endif %}
+                        
                         {% endif %}
 
-                       
+                        {% if Importancia %}
+                        <div class="card w-50 mx-auto">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                Tabla de Importancia
+                            </div>
+                            <div class="card-body">
+                                <table id="datatableImportancia">
+                                    {% for row in Importancia %}
+                                        {% if forloop.first %} <!-- header de la tabla-->
+                                            <thead>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <th>{{ col }}</th>
+                                            {% endfor %}    
+                                                </tr>
+                                            </tfoot>
+                                        {% elif forloop.counter == 2  %} <!-- poner tbody-->
+                                            <tbody>
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% else %} <!-- informacion extra -->
+                                                <tr>
+                                            {% for col in row %}
+                                                    <td>{{ col }}</td>        
+                                            {% endfor %}
+                                                </tr>
+                                        {% endif %}
+                                            
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}<!--END if Importancia-->
                         
+                        {% if arbol_url %}
+                        <h3>Arbol de decisión</h3>
+                        <div class="mx-auto w-75">
+                            <img src="{% static 'assets/img/simulations/' %}{{arbol_url}}" class="img-fluid" alt="Arbol">
+                        </div>
+                        {% endif %}<!--END if arbol_url-->
+
+
+                        {% if score %}
+                        <!-- Button trigger modal -->
+                        <div class="w-25 mx-auto mb-5">
+                            <a href="{% url 'algoritmos:prediccion' %}" target="_blank">
+                                <button type="button" class="form-control btn btn-primary ">
+                                    Probar el modelo
+                                </button>        
+                            </a>                                    
+                        </div>
+
+                        {% endif %}<!--END if score-->
 
                         {% endif %} <!--END if heatmap_url-->
 

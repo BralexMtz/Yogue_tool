@@ -3,7 +3,8 @@
 {% block content %}
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Predicción</h1>
+                        <h1 class="mt-4">Predicción{% if algoritmo %} con {{algoritmo}} {% endif %}
+                        </h1>
                         {% if vars %}
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Ingrese los datos para predecir</li>
